@@ -1,11 +1,12 @@
-// import Room from './Room.js';
+import Room from './Room.js';
+
 // import { getRandomJoke } from './jokes';
 
 class ChatUser {
 	/** Make chat user: store connection-device, room.
 	 *
 	 * @param send {function} callback to send message to this user
-	 * @param room {Room} room user will be in
+	 * @param roomName {string} room user will be in
 	 * */
 
 	constructor(send, roomName) {
@@ -86,15 +87,24 @@ class ChatUser {
 	 */
 
 	handleMessage(jsonData) {
-		let msg = JSON.parse(jsonData);
+		const msg = JSON.parse(jsonData);
 
-		if (msg.type === 'join') this.handleJoin(msg.name);
-		else if (msg.type === 'chat') this.handleChat(msg.text);
-		else if (msg.type === 'get-joke') this.handleGetJoke();
-		else if (msg.type === 'get-members') this.handleGetMembers();
-		else if (msg.type === 'change-username') this.handleChangeUsername(msg.text);
-		else if (msg.type === 'priv-chat') this.handlePrivateChat(msg.recipient, msg.text);
-		else throw new Error(`bad message: ${msg.type}`);
+		switch (msg.type) {
+			case 'join':
+				return this.handleJoin(msg.name);
+			case 'chat':
+				return this.handleChat(msg.text);
+			case 'get-joke':
+				return this.handleGetJoke();
+			case 'get-members':
+				return this.handleGetMembers();
+			case 'change-username':
+				return this.handleChangeUsername(msg.text);
+			case 'priv-chat':
+				return this.handlePrivateChat(msg.recipient, msg.text);
+			default:
+				throw new Error(`bad message: ${msg.type}`);
+		}
 	}
 
 	/** Connection was closed: leave room, announce exit to others. */

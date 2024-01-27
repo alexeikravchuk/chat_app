@@ -10,9 +10,7 @@ app.use(express.static('static/'));
 const wsApp = expressWs(app);
 app.ws('/chat/:roomName', (ws, req, next) => {
 
-	setTimeout(() => ws.send(Math.random()), 2000);
-	setTimeout(() => ws.close(), 4000);
-	/*try {
+	try {
 		const user = new ChatUser(ws.send.bind(ws), req.params.roomName);
 
 		ws.on('message', function(msg) {
@@ -33,7 +31,7 @@ app.ws('/chat/:roomName', (ws, req, next) => {
 
 	} catch (e) {
 		console.error(e);
-	}*/
+	}
 });
 
 app.get('/:roomName', (req, res) => {
