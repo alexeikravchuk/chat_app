@@ -10,7 +10,8 @@ app.use(express.static('static/'));
 const wsApp = expressWs(app);
 app.ws('/chat/:roomName', (ws, req, next) => {
 
-	setInterval(() => ws.send(Math.random()), 2000);
+	setTimeout(() => ws.send(Math.random()), 2000);
+	setTimeout(() => ws.close(), 4000);
 	/*try {
 		const user = new ChatUser(ws.send.bind(ws), req.params.roomName);
 
