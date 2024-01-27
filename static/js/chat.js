@@ -1,4 +1,6 @@
-const socket = new WebSocket('ws://localhost:3000/chat/people');
+const urlParts = window.location.pathname.split('/').at(-1);
+
+const socket = new WebSocket(`ws://localhost:3000/chat/${urlParts}`);
 const username = prompt('Enter your username (no spaces)');
 
 socket.onmessage = (e) => {
@@ -19,10 +21,7 @@ socket.onmessage = (e) => {
 			item.innerHTML = `<strong>${data.name}</strong>: ${data.text}`;
 			document.getElementById('messages').append(item);
 		}
-
-
 	}
-
 };
 
 socket.onopen = (e) => {
