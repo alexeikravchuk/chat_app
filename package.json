@@ -1,0 +1,15 @@
+{
+  "name": "groupchat",
+  "version": "1.0.0",
+  "description": "simple group chat application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "jsdoc -d docs ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jsdoc": "^4.0.2"
+  }
+}
