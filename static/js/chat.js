@@ -27,6 +27,9 @@ socket.onmessage = (e) => {
 socket.onopen = (e) => {
 	console.log('web socket opened!');
 	socket.send(JSON.stringify({ type: 'join', name: username }));
+
+	socket.send(JSON.stringify({ type: 'get-joke' }));
+
 };
 
 socket.onerror = (e) => {
@@ -45,3 +48,4 @@ document.getElementById('msg-form')
 		input.value = '';
 		socket.send(JSON.stringify({ type: 'chat', text: text }));
 	});
+

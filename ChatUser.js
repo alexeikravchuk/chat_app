@@ -1,6 +1,6 @@
 import Room from './Room.js';
 
-// import { getRandomJoke } from './jokes';
+import { getRandomJoke } from './jokes.js';
 
 class ChatUser {
 	/** Make chat user: store connection-device, room.
