@@ -1,51 +1,77 @@
-const urlParts = window.location.pathname.split('/').at(-1);
-
-const socket = new WebSocket(`ws://localhost:3000/chat/${urlParts}`);
-const username = prompt('Enter your username (no spaces)');
-
-socket.onmessage = (e) => {
-	console.log('Message from websocket', e.data);
-	const data = JSON.parse(e.data);
-
-	switch (data.type) {
-		case 'note': {
-			const item = document.createElement('li');
-			const text = document.createElement('em');
-			text.textContent = data.text;
-			item.append(text);
-			document.getElementById('messages').append(item);
-			break;
-		}
-		case 'chat': {
-			const item = document.createElement('li');
-			item.innerHTML = `<strong>${data.name}</strong>: ${data.text}`;
-			document.getElementById('messages').append(item);
-		}
+// CHAT WITH NOTIFICATIONS API
+// Use this file with the websockets chat app (the previous section.)
+function getRoomNameFromURL() {
+	const urlParts = document.URL.split('/');
+	if (urlParts.length < 3) {
+		console.error('Invalid URL: Room name not found.');
+		return null;
 	}
-};
+	return urlParts.at(-1);
+}
 
-socket.onopen = (e) => {
-	console.log('web socket opened!');
-	socket.send(JSON.stringify({ type: 'join', name: username }));
+// Helper function to create chat message elements
+// This function does too much and should probably be split up!
+function createMessageElement(msg) {
+	const item = document.createElement('li');
+	if (msg.type === 'note') {
+		const text = document.createElement('em');
+		text.textContent = msg.text;
+		item.appendChild(text);
+	} else if (msg.type === 'chat') {
+		if (msg.name !== username && document.visibilityState !== 'visible') {
+			showNotification(msg);
+		}
+		item.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
+	}
+	return item;
+}
 
-	socket.send(JSON.stringify({ type: 'get-joke' }));
+async function showNotification({ name, text }) {
+	const permission = await Notification.requestPermission();
+	if (permission === 'granted') {
+		const notification = new Notification(`New Chat message from ${name}`, {
+			body: text,
+		});
+		notification.addEventListener('click', () => {
+			notification.close();
+			window.focus();
+		});
+	}
+}
 
-};
+// Initialize WebSocket connection
+function initializeWebSocket(roomName, username) {
+	const socket = new WebSocket(`ws://localhost:3000/chat/${roomName}`);
 
-socket.onerror = (e) => {
-	console.log('something went wrong!', e);
-};
+	socket.onopen = () => {
+		console.log('WebSocket Opened');
+		socket.send(JSON.stringify({ type: 'join', name: username }));
+	};
 
-socket.onclose = (e) => {
-	console.log('web socket has been closed!');
-};
+	socket.onmessage = (evt) => {
+		const msg = JSON.parse(evt.data);
+		const messageElement = createMessageElement(msg);
+		document.querySelector('#messages').appendChild(messageElement);
+	};
 
-document.getElementById('msg-form')
-	.addEventListener('submit', (e) => {
-		e.preventDefault();
-		const input = document.getElementById('messageInput');
-		const text = input.value;
-		input.value = '';
-		socket.send(JSON.stringify({ type: 'chat', text: text }));
-	});
+	socket.onerror = (evt) => {
+		console.error('WebSocket Error', evt);
+	};
 
+	socket.onclose = () => {
+		console.log('WebSocket Closed');
+	};
+
+	return socket;
+}
+
+const roomName = getRoomNameFromURL();
+const username = prompt('Enter your username (no spaces)');
+const socket = initializeWebSocket(roomName, username);
+
+document.querySelector('#msg-form').addEventListener('submit', (evt) => {
+	evt.preventDefault();
+	const input = document.querySelector('#messageInput');
+	socket.send(JSON.stringify({ type: 'chat', text: input.value }));
+	input.value = '';
+});
